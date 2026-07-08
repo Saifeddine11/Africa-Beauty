@@ -12,6 +12,7 @@ export const ImageComparison = ({
   const [sliderPosition, setSliderPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
   const containerRef = useRef(null);
+  const touchStartRef = useRef({ x: 0, y: 0, locked: false });
 
   const updateFromClientX = useCallback((clientX) => {
     if (!containerRef.current) return;
@@ -32,9 +33,26 @@ export const ImageComparison = ({
   const handleMouseDown = () => setIsDragging(true);
   const handleMouseUp = useCallback(() => setIsDragging(false), []);
   const handleMouseMove = (e) => handleMove(e.clientX);
-  const handleTouchStart = () => setIsDragging(true);
-  const handleTouchEnd = () => setIsDragging(false);
-  const handleTouchMove = (e) => handleMove(e.touches[0].clientX);
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY, locked: false };
+  };
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    touchStartRef.current.locked = false;
+  };
+  const handleTouchMove = (e) => {
+    const touch = e.touches[0];
+    const start = touchStartRef.current;
+    const dx = Math.abs(touch.clientX - start.x);
+    const dy = Math.abs(touch.clientY - start.y);
+
+    if (!start.locked && dy > dx) return;
+
+    start.locked = true;
+    setIsDragging(true);
+    updateFromClientX(touch.clientX);
+  };
   const handleContainerClick = (e) => updateFromClientX(e.clientX);
 
   const handleKeyDown = (e) => {

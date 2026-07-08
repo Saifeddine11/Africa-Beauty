@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "framer-motion";
 
 const testimonials = [] as {
   text: string;
@@ -15,13 +15,13 @@ export const TestimonialsColumn = (props: {
   testimonials: typeof testimonials;
   duration?: number;
 }) => {
+  const prefersReducedMotion = useReducedMotion();
+
   return (
     <div className={`testimonial-column ${props.className || ""}`}>
       <motion.div
-        animate={{
-          translateY: "-50%",
-        }}
-        transition={{
+        animate={prefersReducedMotion ? { translateY: 0 } : { translateY: "-50%" }}
+        transition={prefersReducedMotion ? { duration: 0 } : {
           duration: props.duration || 10,
           repeat: Infinity,
           ease: "linear",
